@@ -4,17 +4,16 @@ use crate::values::{
     rule::Rule,
     vec2::Vec2,
 };
-use std::fmt::Write;
+use std::fmt::{self, Write};
 
-#[derive(Default)]
-pub struct World {
+pub struct World<R: Rule> {
     grid: Grid,
-    rules: Vec<Box<dyn Rule>>,
+    rule: R,
 }
 
-impl World {
-    pub fn new(grid: Grid, rules: Vec<Box<dyn Rule>>) -> World {
-        World { grid, rules }
+impl<R: Rule> World<R> {
+    pub fn new(grid: Grid, rule: R) -> World<R> {
+        World { grid, rule }
     }
     pub fn update(&mut self) {
         let grid_snapshot = self.grid.clone();
@@ -23,11 +22,9 @@ impl World {
                 let position = Vec2::new(x as i32, y as i32);
                 let target_cell = grid_snapshot.look(position).copied().unwrap_or(Cell::Dead);
                 let total_alive_neighbors = grid_snapshot.count_alive_neighbors(position);
-                for rule in &self.rules {
-                    self.grid
-                        .set(position, rule.apply(target_cell, total_alive_neighbors))
-                        .unwrap();
-                }
+                self.grid
+                    .set(position, self.rule.apply(target_cell, total_alive_neighbors))
+                    .unwrap();
             }
         }
     }
@@ -43,14 +40,14 @@ impl World {
         }
         let mut buf = String::new();
         for (i, row) in visual_grid.iter().enumerate() {
-            write!(buf, "{}{}", termion::cursor::Goto(1, i as u16), row).unwrap();
+            write!(buf, "{}{}", termion::cursor::Goto(10, (i + 5) as u16), row).unwrap();
         }
         write!(screen, "{}{}", termion::cursor::Goto(1, 1), buf).unwrap();
     }
 }
 
-impl std::fmt::Display for World {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<R: Rule> fmt::Display for World<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.grid.fmt(f)
     }
 }
@@ -58,8 +55,8 @@ impl std::fmt::Display for World {
 #[cfg(test)]
 mod tests {
     use crate::{
-        entities::rules,
-        values::{grid::Grid, rule::Rule},
+        entities::rules::StandardRule,
+        values::grid::Grid,
     };
 
     use super::World;
@@ -85,13 +82,7 @@ mod tests {
             "                ",
         ])
         .unwrap();
-        let rules: Vec<Box<dyn Rule>> = vec![
-            Box::new(rules::Overpopulation),
-            Box::new(rules::Survival),
-            Box::new(rules::Underpopulation),
-            Box::new(rules::Reproduction),
-        ];
-        let mut world = World::new(grid, rules);
+        let mut world = World::new(grid, StandardRule);
         println!("{}", world);
         world.update();
         println!("{}", world);

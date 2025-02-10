@@ -1,6 +1,6 @@
 use std::{io::{stdin, stdout, Write}, thread, time::{Duration, Instant}};
 
-use rifegame::{entities::{rules, world::World}, values::{grid::{Grid, WORLD_HEIGHT}, rule::Rule}};
+use rifegame::{entities::{rules::StandardRule, world::World}, values::grid::{Grid, WORLD_HEIGHT}};
 use termion::{event::{Event, Key}, input::TermRead, raw::IntoRawMode};
 
 const FPS: u64 = 5;
@@ -9,15 +9,15 @@ const INITIAL_GRID: [&str; WORLD_HEIGHT] = [
     "                ",
     "                ",
     "                ",
-    "                ",
-    "                ",
-    "                ",
-    "       o        ",
-    "                ",
-    "                ",
-    "                ",
-    "                ",
-    "                ",
+    "    oo oooooo   ",
+    "    oo oooooo   ",
+    "    oo          ",
+    "    oo     oo   ",
+    "    oo     oo   ",
+    "    oo     oo   ",
+    "           oo   ",
+    "    oooooo oo   ",
+    "    oooooo oo   ",
     "                ",
     "                ",
     "                ",
@@ -26,13 +26,7 @@ const INITIAL_GRID: [&str; WORLD_HEIGHT] = [
 
 fn main() {
     let grid = Grid::try_from(INITIAL_GRID).unwrap();
-    let rules: Vec<Box<dyn Rule>> = vec![
-        Box::new(rules::Overpopulation),
-        Box::new(rules::Survival),
-        Box::new(rules::Underpopulation),
-        Box::new(rules::Reproduction),
-    ];
-    let mut world = World::new(grid, rules);
+    let mut world = World::new(grid, StandardRule);
 
     let stdout = stdout();
     let mut screen = stdout.lock().into_raw_mode().unwrap();

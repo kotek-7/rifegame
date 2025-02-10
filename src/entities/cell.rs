@@ -16,3 +16,15 @@ impl Display for Cell {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::entities::cell::Cell;
+
+    #[test]
+    fn test_to_num() {
+        assert_eq!(Cell::Dead as u32, 0);
+        assert_eq!(Cell::Alive as u32, 1);
+    }
+
+}

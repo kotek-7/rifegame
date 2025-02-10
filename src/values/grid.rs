@@ -7,7 +7,7 @@ use crate::values::vec2::Vec2;
 pub const WORLD_WIDTH: usize = 16;
 pub const WORLD_HEIGHT: usize = 16;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Grid(pub [[Cell; WORLD_WIDTH]; WORLD_HEIGHT]);
 
 impl Grid {
@@ -31,37 +31,37 @@ impl Grid {
     }
 
     pub fn count_alive_neighbors(&self, center: Vec2) -> u32 {
-        self.look(Vec2::new(center.y - 1, center.x))
+        (self.look(Vec2::new(center.x - 1, center.y))
             .copied()
-            .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y - 1, center.x + 1))
+            .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x - 1, center.y + 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y, center.x + 1))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x, center.y + 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y + 1, center.x + 1))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x + 1, center.y + 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y + 1, center.x))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x + 1, center.y))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y + 1, center.x - 1))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x + 1, center.y - 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y, center.x - 1))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x, center.y - 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
-            + self
-                .look(Vec2::new(center.y - 1, center.x - 1))
+                .unwrap_or(Cell::Dead) as u32)
+            + (self
+                .look(Vec2::new(center.x - 1, center.y - 1))
                 .copied()
-                .unwrap_or(Cell::Dead) as u32
+                .unwrap_or(Cell::Dead) as u32)
     }
 }
 
@@ -105,6 +105,8 @@ impl std::fmt::Display for Grid {
 
 #[cfg(test)]
 mod tests {
+    use crate::{entities::cell::Cell, values::vec2::Vec2};
+
     use super::Grid;
 
     #[test]
@@ -129,5 +131,56 @@ mod tests {
         ];
         let grid: Grid = allay.try_into().unwrap();
         println!("{}", grid);
+    }
+
+    #[test]
+    fn test_count_alive_neighbors() {
+        let allay = [
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "       ooo      ",
+            "       ooo      ",
+            "       ooo      ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+        ];
+        let grid: Grid = allay.try_into().unwrap();
+        let center_position = Vec2::new(8, 6);
+        let count = grid.count_alive_neighbors(center_position);
+        assert_eq!(count, 8);
+    }
+
+    #[test]
+    fn test_look() {
+        let allay = [
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "        o       ",
+            "       o o      ",
+            "        o       ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+            "                ",
+        ];
+        let grid: Grid = allay.try_into().unwrap();
+        let target = grid.look(Vec2::new(8, 6));
+        assert_eq!(target, Some(&Cell::Dead));
     }
 }
