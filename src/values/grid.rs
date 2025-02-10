@@ -4,8 +4,8 @@ use crate::entities::cell::Cell;
 use crate::errors::{IndexOutOfBoundsError, InvalidFormatError};
 use crate::values::vec2::Vec2;
 
-pub const WORLD_WIDTH: usize = 16;
-pub const WORLD_HEIGHT: usize = 16;
+pub const WORLD_WIDTH: usize = 32;
+pub const WORLD_HEIGHT: usize = 32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Grid(pub [[Cell; WORLD_WIDTH]; WORLD_HEIGHT]);
